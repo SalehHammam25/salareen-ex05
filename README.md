@@ -162,14 +162,50 @@ token volume on-prem becomes cheaper than API.
 
 ## 8. Results
 
-> **[PENDING — experiments not yet run]**
->
-> This section will contain:
-> - Summary table comparing all experiment phases
-> - TTFT / TPOT / throughput charts
-> - Peak RAM bar chart
-> - Economic analysis break-even chart
-> - Qualitative output comparison
+### Baseline 1: Ollama — qwen2.5:0.5b (CPU-only)
+
+First real inference result collected on the target hardware using the Ollama HTTP API
+(`http://localhost:11434/api/generate`), model `qwen2.5:0.5b`, with the fixed benchmark
+prompt stored in `data/prompts/ollama_benchmark_prompt.txt`.
+
+| Metric | Value |
+|--------|-------|
+| Model | qwen2.5:0.5b (0.5B parameters) |
+| Total wall-clock runtime | 17.31 s |
+| Prompt tokens (prompt_eval_count) | 79 |
+| Prompt eval duration | 107,959,000 ns (≈ 108 ms) |
+| Output tokens (eval_count) | 270 |
+| Eval (decode) duration | 10,389,355,000 ns (≈ 10.39 s) |
+| **Throughput** | **25.99 tokens/sec** |
+| Process RSS before (script only) | 38.44 MB |
+| Process RSS after (script only) | 39.97 MB |
+| Process RSS delta | 1.53 MB |
+
+> **RAM note:** The RSS values above reflect only the benchmark script process.
+> The Ollama server and model weights run in a separate process; total system
+> memory for the model should be measured from the Ollama process directly
+> (planned for a later phase).
+
+![Ollama qwen2.5:0.5b benchmark summary](figures/ollama_benchmark_qwen2_5_0_5b_summary.png)
+
+#### Interpretation
+
+- **Local CPU-only inference is feasible for a very small 0.5B model.** At ~26 tokens/sec
+  the output is readable in near real-time on consumer hardware with no GPU.
+- **This is a functional baseline, not a proof that larger models will work.** qwen2.5:0.5b
+  is far smaller than the "massive LLM" target of this experiment; a 7B model would require
+  roughly 14× more memory and would be correspondingly slower on CPU.
+- **Prefill vs. decode split is visible:** the 79 prompt tokens were evaluated in ~108 ms
+  (≈ 732 tokens/sec — fast, parallelisable prefill), while the 270 decode tokens took
+  ~10.4 s total (≈ 26 tokens/sec — slow, sequential decode). This directly illustrates the
+  prefill/decode asymmetry discussed in the lecture.
+- **Next phases** will test a larger model (≥ 1.5B), apply quantization, attempt AirLLM
+  layer-streaming, and produce an economic break-even analysis.
+
+---
+
+> **Still pending:** quantization comparison, AirLLM / fallback experiment, economic
+> analysis, comparative summary table, and final report.
 
 ---
 

@@ -55,9 +55,11 @@ Mark tasks with `[x]` when complete.
 - [x] Create `data/prompts/ollama_benchmark_prompt.txt`
 - [x] Add `tests/test_ollama_benchmark.py` (mocked, no real Ollama needed)
 - [x] Add `requests>=2.31` to `pyproject.toml`
-- [ ] Run the benchmark: `uv run python -m salareen_ex05.main ollama-benchmark --model qwen2.5:0.5b --runs 3`
-- [ ] Verify `results/ollama_benchmark_qwen2_5_0_5b.json` and `.csv` are created
-- [ ] Record real TTFT / throughput numbers in README §8
+- [x] Run the benchmark: `uv run python -m salareen_ex05.main ollama-benchmark --model qwen2.5:0.5b --runs 1`
+- [x] Verify `results/ollama_benchmark_qwen2_5_0_5b.json` and `.csv` created
+- [x] Generate figure: `figures/ollama_benchmark_qwen2_5_0_5b_summary.png`
+- [x] Record real baseline result in README §8 (25.99 tok/s, 17.31 s, 270 output tokens)
+- [ ] Repeat with `--runs 3` for mean ± std stability check
 
 ---
 

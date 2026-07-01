@@ -113,4 +113,38 @@ but the most natural file to pass was the CSV.
 
 ---
 
+## Entry 004 — 2026-07-02
+
+**Purpose:** Record the first real baseline benchmark result in README §8.
+
+**Tool used:** Claude (Anthropic) via VS Code Claude Code extension.
+
+**Real data provided by user (not fabricated):**
+- Model: `qwen2.5:0.5b` via Ollama HTTP API
+- Wall-clock runtime: 17.3146 s
+- Prompt tokens: 79, prompt_eval_duration: 107,959,000 ns
+- Output tokens: 270, eval_duration: 10,389,355,000 ns
+- Throughput: 25.988 tokens/sec
+- Process RSS before: 38.44 MB, after: 39.97 MB, delta: 1.53 MB
+- Figure: `figures/ollama_benchmark_qwen2_5_0_5b_summary.png`
+
+**Key constraints given:**
+- Do not fake additional results.
+- Do not claim AirLLM or quantization was tested.
+- Note that RSS values are script-process-only, not full Ollama server footprint.
+- Keep writing technical, honest, and concise.
+
+**Changes made:**
+- `README.md` — replaced the `[PENDING]` placeholder in §8 Results with:
+  a results table, Markdown figure reference, and a 4-point interpretation
+  (feasibility, scope limitation, prefill/decode split, next steps).
+- `docs/TODO.md` — marked Phase 3b benchmark run, results files, figure, and
+  README update as complete; left 3-run stability check as pending.
+- `docs/PROMPT_LOG.md` — this entry.
+
+**Outcome:** README now contains one real, honest baseline data point.
+Quantization, AirLLM, economic analysis, and full comparison remain pending.
+
+---
+
 <!-- Add new entries below this line -->
