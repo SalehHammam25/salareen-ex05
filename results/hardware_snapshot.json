@@ -1,0 +1,15 @@
+{
+  "cpu_brand": "Intel64 Family 6 Model 142 Stepping 10, GenuineIntel",
+  "cpu_cores_physical": 4,
+  "cpu_cores_logical": 8,
+  "cpu_freq_max_mhz": 1992.0,
+  "ram_total_gb": 15.864665985107422,
+  "ram_available_gb": 3.2816810607910156,
+  "disk_path": "C:\\",
+  "disk_total_gb": 475.82323837280273,
+  "disk_free_gb": 194.37683868408203,
+  "cuda_available": false,
+  "gpu_info": "No CUDA GPU detected (CPU-only machine)",
+  "python_version": "3.12.13",
+  "platform_str": "Windows-11-10.0.26200-SP0"
+}
