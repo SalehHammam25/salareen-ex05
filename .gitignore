@@ -216,3 +216,19 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# salareen-ex05: large model weights and raw data (keep results JSON/CSV)
+*.gguf
+*.safetensors
+*.bin
+*.pt
+*.pth
+models/
+data/raw/
+results/hardware_snapshot.json
+
+# Hugging Face model cache (if pointed inside repo)
+.cache/
+
+# Generated PDF (submit separately)
+salareen-ex05.pdf
