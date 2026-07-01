@@ -59,7 +59,16 @@ Mark tasks with `[x]` when complete.
 - [x] Verify `results/ollama_benchmark_qwen2_5_0_5b.json` and `.csv` created
 - [x] Generate figure: `figures/ollama_benchmark_qwen2_5_0_5b_summary.png`
 - [x] Record real baseline result in README §8 (25.99 tok/s, 17.31 s, 270 output tokens)
-- [ ] Repeat with `--runs 3` for mean ± std stability check
+- [x] Run qwen2.5:1.5b benchmark (15.28 tok/s, 26.77 s, 295 output tokens)
+- [x] Generate figure: `figures/ollama_benchmark_qwen2_5_1_5b_summary.png`
+- [x] Add cross-model comparison table and analysis to README §8
+- [ ] Repeat each model with `--runs 3` for mean ± std stability check
+- [ ] Measure system-level Ollama server memory (separate from script RSS)
+- [ ] Test a larger model (≥ 7B) or GGUF-quantized variant
+- [ ] Attempt AirLLM layer-streaming on 7B model; document success or failure
+- [ ] Run economic analysis: `uv run python -m salareen_ex05.main costs --tokens-per-sec 15.28`
+- [ ] Generate final comparative plots across all phases
+- [ ] Write final README report and generate `salareen-ex05.pdf`
 
 ---
 

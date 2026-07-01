@@ -199,13 +199,69 @@ prompt stored in `data/prompts/ollama_benchmark_prompt.txt`.
   (≈ 732 tokens/sec — fast, parallelisable prefill), while the 270 decode tokens took
   ~10.4 s total (≈ 26 tokens/sec — slow, sequential decode). This directly illustrates the
   prefill/decode asymmetry discussed in the lecture.
-- **Next phases** will test a larger model (≥ 1.5B), apply quantization, attempt AirLLM
-  layer-streaming, and produce an economic break-even analysis.
+- **Next phases** will apply quantization, attempt AirLLM layer-streaming on a larger
+  model, and produce an economic break-even analysis.
 
 ---
 
-> **Still pending:** quantization comparison, AirLLM / fallback experiment, economic
-> analysis, comparative summary table, and final report.
+### Baseline 2: Ollama — qwen2.5:1.5b (CPU-only)
+
+Second inference result, same hardware, same fixed prompt, model scaled up to 1.5B parameters.
+
+| Metric | Value |
+|--------|-------|
+| Model | qwen2.5:1.5b (1.5B parameters) |
+| Total wall-clock runtime | 26.77 s |
+| Prompt tokens (prompt_eval_count) | 79 |
+| Prompt eval duration | 1,446,900,000 ns (≈ 1.45 s) |
+| Output tokens (eval_count) | 295 |
+| Eval (decode) duration | 19,308,239,000 ns (≈ 19.31 s) |
+| **Throughput** | **15.28 tokens/sec** |
+| Process RSS before (script only) | 38.30 MB |
+| Process RSS after (script only) | 39.43 MB |
+| Process RSS delta | 1.13 MB |
+
+> **RAM note:** RSS values reflect the benchmark script process only, not the Ollama
+> server or model weights. System-level Ollama memory measurement is planned for a
+> later phase.
+
+![Ollama qwen2.5:1.5b benchmark summary](figures/ollama_benchmark_qwen2_5_1_5b_summary.png)
+
+---
+
+### Cross-model Comparison
+
+| Model | Runtime (s) | Prompt tokens | Output tokens | Throughput (tok/s) | Script RSS delta (MB) |
+|-------|-------------|---------------|---------------|--------------------|-----------------------|
+| qwen2.5:0.5b | 17.31 | 79 | 270 | **25.99** | 1.53 |
+| qwen2.5:1.5b | 26.77 | 79 | 295 | **15.28** | 1.13 |
+| Throughput ratio | — | — | — | 0.59× (1.5b / 0.5b) | — |
+
+#### Analysis
+
+- **Throughput dropped from ~26.0 to ~15.3 tok/s (−41%) as model size tripled from
+  0.5B to 1.5B.** This is consistent with a memory-bandwidth-bound workload: a larger
+  model has proportionally more weight data that must be streamed through the CPU cache
+  on every decode step.
+- **Runtime increased from 17.3 s to 26.8 s (+55%)** for a similar output length,
+  confirming that the decode phase scales roughly linearly with model size on CPU.
+- **Prefill cost is more sensitive to model size than decode throughput alone:**
+  prompt eval duration grew from ~108 ms (0.5B) to ~1,450 ms (1.5B) — a 13× increase
+  for only a 3× parameter increase, suggesting additional memory-allocation overhead
+  at first load.
+- **Both models are still far smaller than the "massive LLM" target.** A 7B model at
+  this scaling trend would project to roughly 4–6 tok/s on this hardware, making
+  interactive use marginal. The next phase must quantify this with either a direct
+  7B test, a GGUF-quantized model, or AirLLM layer-streaming.
+- **Script-level RSS deltas are small and similar across both runs.** This confirms
+  that the benchmark wrapper itself has negligible memory overhead; the real model
+  footprint lives in the Ollama server process.
+
+---
+
+> **Still pending:** larger model / quantization experiment, AirLLM / fallback,
+> system-level Ollama memory tracking, economic analysis, comparative charts across
+> all phases, and final PDF report.
 
 ---
 

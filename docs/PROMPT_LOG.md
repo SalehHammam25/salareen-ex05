@@ -147,4 +147,40 @@ Quantization, AirLLM, economic analysis, and full comparison remain pending.
 
 ---
 
+## Entry 005 — 2026-07-02
+
+**Purpose:** Add qwen2.5:1.5b real benchmark result and cross-model comparison to README §8.
+
+**Tool used:** Claude (Anthropic) via VS Code Claude Code extension.
+
+**Real data provided by user (not fabricated):**
+- Model: `qwen2.5:1.5b` via Ollama HTTP API, same prompt as Baseline 1
+- Wall-clock runtime: 26.7741 s
+- Prompt tokens: 79, prompt_eval_duration: 1,446,900,000 ns
+- Output tokens: 295, eval_duration: 19,308,239,000 ns
+- Throughput: 15.278 tokens/sec
+- Process RSS before: 38.30 MB, after: 39.43 MB, delta: 1.13 MB
+- Figure: `figures/ollama_benchmark_qwen2_5_1_5b_summary.png`
+
+**Constraints given:**
+- Do not fake results.
+- Do not claim AirLLM or quantization was tested.
+- RSS values are script-process-only; note that Ollama server memory is separate.
+- Keep writing technical, honest, and concise.
+
+**Changes made:**
+- `README.md` §8 — appended "Baseline 2: Ollama qwen2.5:1.5b" subsection with metrics
+  table, RAM note, and figure reference; added "Cross-model Comparison" subsection with
+  a two-row comparison table and 5-point analysis (throughput drop, runtime increase,
+  prefill sensitivity, scale gap to 7B, RSS interpretation).
+- `docs/TODO.md` — marked 1.5b benchmark, figure, and README comparison as complete;
+  added pending items for 3-run stability, system-level memory, 7B/GGUF test, AirLLM,
+  economic analysis, final plots, and PDF.
+- `docs/PROMPT_LOG.md` — this entry.
+
+**Outcome:** README now contains two real baselines and an honest cross-model comparison.
+AirLLM, quantization, economic analysis, and final report remain pending.
+
+---
+
 <!-- Add new entries below this line -->
