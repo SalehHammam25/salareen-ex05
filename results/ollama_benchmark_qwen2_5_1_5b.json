@@ -1,0 +1,21 @@
+[
+  {
+    "model": "qwen2.5:1.5b",
+    "run_index": 1,
+    "prompt_chars": 261,
+    "response_chars": 1656,
+    "total_runtime_sec": 26.77407459999995,
+    "total_duration_ns": 24705786500,
+    "load_duration_ns": 3935757100,
+    "prompt_eval_count": 79,
+    "prompt_eval_duration_ns": 1446900000,
+    "eval_count": 295,
+    "eval_duration_ns": 19308239000,
+    "tokens_per_sec": 15.278451856743642,
+    "ram_before_mb": 38.30078125,
+    "ram_after_mb": 39.4296875,
+    "ram_delta_mb": 1.12890625,
+    "response_text": "The prefill and decode phases are crucial steps in the execution of a large language model (LLM) during its inference process. The prefill phase prepares the input data by expanding it into fixed-length tokens, or \"words,\" that can be processed by the LLM's architecture. This expansion step is where memory bandwidth becomes a critical factor; faster memory bandwidth allows for more efficient prefilling of the model with larger amounts of text, which in turn speeds up subsequent decoding.\n\nIn contrast, the decode phase is responsible for generating the final output from these preprocessed tokens. The decode process involves mapping each token to its corresponding meaning or response, using the LLM's internal knowledge and context. This phase is often where compute utilization starts to increase as it requires significant processing power. CPUs are generally slower at this stage because they are optimized for sequential data processing rather than parallel computation typical in the decoding step.\n\nThe decode phase typically ends up being more CPU-bound due to the need to map tokens back into language, which can be computationally intensive and is thus less efficient on CPU hardware compared to the prefilling phase. Therefore, while both phases contribute equally to overall inference performance, different hardware architectures (like CPUs vs GPUs) optimize for specific aspects of these processes, leading to varying bottlenecks in either the prefill or decode step depending on whether a model can fully leverage GPU acceleration through techniques such as parallel decoding and custom instruction sets designed specifically for LLMs.",
+    "error": null
+  }
+]
