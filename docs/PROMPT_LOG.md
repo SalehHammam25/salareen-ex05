@@ -87,4 +87,30 @@ and record results in README §8.
 
 ---
 
+## Entry 003 — 2026-07-02
+
+**Purpose:** Fix the `plots` CLI command to support CSV files, not just JSON.
+
+**Tool used:** Claude (Anthropic) via VS Code Claude Code extension.
+
+**Root cause of bug:**
+The `plots` command in `main.py` called `json.load()` unconditionally, so passing a CSV
+file caused a `JSONDecodeError`. The Ollama benchmark saves results as both CSV and JSON,
+but the most natural file to pass was the CSV.
+
+**Changes made:**
+- `src/salareen_ex05/plots.py` — added `load_results(path)` (detects `.csv` vs `.json`)
+  and `benchmark_summary(results, stem)` (3-panel bar chart for Ollama benchmark data).
+- `src/salareen_ex05/main.py` — replaced `json.load()` in `plots` command with
+  `plt_mod.load_results()`; dispatch: Ollama data → `benchmark_summary`, generic data →
+  existing latency/ram/throughput charts.
+- `tests/test_plots.py` — created: 11 tests covering CSV load, JSON load, figure
+  generation from CSV, single-row charts, and missing-value robustness.
+- `README.md` — updated §11 with the correct `--results-file` command.
+- `docs/PROMPT_LOG.md` — this entry.
+
+**Outcome:** `plots --results-file results/ollama_benchmark_qwen2_5_0_5b.csv` now works.
+
+---
+
 <!-- Add new entries below this line -->

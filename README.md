@@ -260,8 +260,11 @@ uv run python -m salareen_ex05.main run airllm --model <model-id>
 # Economic analysis
 uv run python -m salareen_ex05.main costs --monthly-input-tokens 1000000 --monthly-output-tokens 200000
 
-# Generate all plots
-uv run python -m salareen_ex05.main plots
+# Generate benchmark summary chart from a CSV results file
+uv run python -m salareen_ex05.main plots --results-file results/ollama_benchmark_qwen2_5_0_5b.csv
+
+# Also works with JSON
+uv run python -m salareen_ex05.main plots --results-file results/ollama_benchmark_qwen2_5_0_5b.json
 ```
 
 ---

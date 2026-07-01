@@ -59,29 +59,33 @@ def costs(
 @app.command()
 def plots(
     results_file: Optional[Path] = typer.Option(
-        None, help="Path to results/summary.csv or a results JSON file."
+        None, help="Path to a results CSV or JSON file (e.g. results/ollama_benchmark_qwen2_5_0_5b.csv)."
     ),
 ) -> None:
-    """Generate comparison charts from experiment results.
-
-    If no results file is provided, prints a notice that experiments must run first.
-    """
+    """Generate charts from a results CSV or JSON file."""
     if results_file is None or not results_file.exists():
         console.print(
-            "[yellow]No results file found. Run inference experiments first, "
-            "then re-run: python -m salareen_ex05.main plots --results-file results/summary.json[/yellow]"
+            "[yellow]No results file found. Run a benchmark first, then:\n"
+            "uv run python -m salareen_ex05.main plots "
+            "--results-file results/ollama_benchmark_qwen2_5_0_5b.csv[/yellow]"
         )
         return
 
-    with open(results_file, encoding="utf-8") as f:
-        data = json.load(f)
-
     from salareen_ex05 import plots as plt_mod
 
-    plt_mod.latency_comparison(data)
-    plt_mod.ram_comparison(data)
-    plt_mod.throughput_comparison(data)
-    console.print("[green]Plots saved to figures/[/green]")
+    data = plt_mod.load_results(results_file)
+    if not data:
+        console.print("[red]Results file is empty.[/red]")
+        return
+
+    if "tokens_per_sec" in data[0]:
+        out = plt_mod.benchmark_summary(data, stem=results_file.stem)
+        console.print(f"[green]Figure saved:[/green] {out}")
+    else:
+        plt_mod.latency_comparison(data)
+        plt_mod.ram_comparison(data)
+        plt_mod.throughput_comparison(data)
+        console.print("[green]Plots saved to figures/[/green]")
 
 
 @app.command(name="ollama-benchmark")
