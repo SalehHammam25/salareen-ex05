@@ -1,0 +1,1 @@
+Explain the difference between the prefill and decode phases in large language model inference. Include how each phase relates to memory bandwidth and compute utilization, and why the decode phase is typically slower on CPU hardware. Answer in 3 to 5 sentences.

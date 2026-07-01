@@ -1,0 +1,21 @@
+[
+  {
+    "model": "qwen2.5:0.5b",
+    "run_index": 1,
+    "prompt_chars": 261,
+    "response_chars": 1525,
+    "total_runtime_sec": 17.314359800000602,
+    "total_duration_ns": 14929333700,
+    "load_duration_ns": 3448241800,
+    "prompt_eval_count": 79,
+    "prompt_eval_duration_ns": 1079599000,
+    "eval_count": 270,
+    "eval_duration_ns": 10389355000,
+    "tokens_per_sec": 25.98813882093739,
+    "ram_before_mb": 38.44140625,
+    "ram_after_mb": 39.97265625,
+    "ram_delta_mb": 1.53125,
+    "response_text": "The prefill and decode phases are crucial steps in the process of large language models (LLMs) understanding a prompt and generating text. The prefill phase, where we pass along previously trained samples, involves using a set of parameters that have already been learned from previous interactions with an LLM. This allows us to make educated guesses about what information the model will need or require in order to generate a specific output.\n\nOn the other hand, the decode phase is where the LLM makes the actual decision and generates text based on its knowledge and context. The decode phase typically takes place on the CPU and involves fetching parameters from RAM or temporary storage and using them to execute an instruction set that computes the next word of text. However, decoding can be relatively slow due to the limitations in computational capacity.\n\nThe prefill phase is usually faster because it does not require any additional computation beyond just storing the training data. The decode phase, however, needs to deal with more advanced computations and processing, which often involve fetching large amounts of data from memory or temporary storage devices.\n\nIn summary, the prefill phase is relatively slow due to its reliance on previous model knowledge, while the decode phase is faster because it does not require additional computation beyond just storing training data. The difference in processing time between these phases makes them suitable for different use cases and hardware configurations.",
+    "error": null
+  }
+]

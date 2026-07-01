@@ -1,10 +1,11 @@
 """CLI entry point for salareen-ex05 experiments.
 
 Sub-commands:
-  hardware   — detect and print hardware info
-  costs      — run economic analysis
-  plots      — generate placeholder charts from saved results
-  run        — [future] run an inference experiment
+  hardware          — detect and print hardware info
+  costs             — run economic analysis
+  plots             — generate charts from saved results
+  ollama-benchmark  — benchmark a local Ollama model
+  run               — [future] run a transformers inference experiment
 """
 
 from __future__ import annotations
@@ -81,6 +82,42 @@ def plots(
     plt_mod.ram_comparison(data)
     plt_mod.throughput_comparison(data)
     console.print("[green]Plots saved to figures/[/green]")
+
+
+@app.command(name="ollama-benchmark")
+def ollama_benchmark(
+    model: str = typer.Option("qwen2.5:0.5b", help="Ollama model tag"),
+    runs: int = typer.Option(1, help="Number of benchmark runs (use 3 for stable averages)"),
+    url: str = typer.Option("http://localhost:11434/api/generate", help="Ollama API endpoint"),
+    prompt_file: Optional[Path] = typer.Option(None, help="Custom prompt file path"),
+) -> None:
+    """Benchmark a local Ollama model and save results to results/."""
+    from salareen_ex05.ollama_benchmark import run_benchmark, save_results
+
+    default_prompt_path = Path(__file__).parent.parent.parent / "data" / "prompts" / "ollama_benchmark_prompt.txt"
+    if prompt_file and prompt_file.exists():
+        prompt = prompt_file.read_text(encoding="utf-8").strip()
+    elif default_prompt_path.exists():
+        prompt = default_prompt_path.read_text(encoding="utf-8").strip()
+    else:
+        prompt = "Explain prefill vs decode in LLM inference in 3 sentences."
+
+    console.print(f"[cyan]Benchmarking {model} ({runs} run(s))...[/cyan]")
+    results = run_benchmark(model, prompt, runs=runs, url=url)
+
+    if any(r.error for r in results):
+        console.print("[red]Benchmark failed — see error above.[/red]")
+        raise typer.Exit(code=1)
+
+    stem = f"ollama_benchmark_{model.replace(':', '_').replace('.', '_')}"
+    json_path, csv_path = save_results(results, stem)
+    console.print(f"[green]Saved:[/green] {json_path.name}  {csv_path.name}")
+
+    tps_vals = [r.tokens_per_sec for r in results if r.tokens_per_sec]
+    if tps_vals:
+        console.print(f"  Avg throughput : {sum(tps_vals)/len(tps_vals):.2f} tok/s")
+    avg_rt = sum(r.total_runtime_sec for r in results) / len(results)
+    console.print(f"  Avg wall-clock : {avg_rt:.2f} s")
 
 
 @app.command(name="run")

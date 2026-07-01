@@ -48,4 +48,43 @@ Next step: Phase 2 — environment setup with `uv`.
 
 ---
 
+## Entry 002 — 2026-07-02
+
+**Purpose:** Implement a real Ollama benchmark pipeline (Phase 3b).
+
+**Tool used:** Claude (Anthropic) via VS Code Claude Code extension.
+
+**Context at the time of this prompt:**
+- Initial project skeleton was complete (Entry 001).
+- Ollama was installed and working on the machine.
+- Model `qwen2.5:0.5b` was pulled and a smoke test was saved to `results/ollama_smoke_test.txt`.
+- No full benchmark pipeline existed yet.
+
+**Key instructions given:**
+- Use the Ollama HTTP API (`http://localhost:11434/api/generate`).
+- Measure wall-clock time, Ollama native timing fields, tokens/sec, and RAM delta.
+- Save results to `results/ollama_benchmark_qwen2_5_0_5b.json` and `.csv`.
+- Save the fixed prompt to `data/prompts/ollama_benchmark_prompt.txt`.
+- Add a CLI command `ollama-benchmark` to `main.py`.
+- Add mocked tests (no real Ollama needed for `pytest`).
+- Keep every source file under 150 lines.
+- Do NOT run the benchmark automatically.
+- Do NOT fake results.
+
+**Files created/modified:**
+- `src/salareen_ex05/ollama_benchmark.py` — created: core benchmark module
+- `src/salareen_ex05/main.py` — updated: added `ollama-benchmark` command
+- `pyproject.toml` — updated: added `requests>=2.31` dependency
+- `tests/test_ollama_benchmark.py` — created: mocked tests for benchmark module
+- `data/prompts/ollama_benchmark_prompt.txt` — created: fixed benchmark prompt
+- `README.md` — updated: added benchmark commands to §11
+- `docs/TODO.md` — updated: marked Phases 2 & 3 complete, added Phase 3b tasks
+- `docs/PROMPT_LOG.md` — updated: this entry
+
+**Outcome:** Benchmark pipeline implemented. Real results NOT collected yet.
+Next step: run `uv run python -m salareen_ex05.main ollama-benchmark --model qwen2.5:0.5b --runs 3`
+and record results in README §8.
+
+---
+
 <!-- Add new entries below this line -->

@@ -29,25 +29,35 @@ Mark tasks with `[x]` when complete.
 
 ## Phase 2: Environment Setup
 
-- [ ] Confirm Python 3.11 available (`python --version`)
-- [ ] Install `uv` globally if not already installed
-- [ ] Run `uv venv --python 3.11` to create `.venv`
-- [ ] Activate `.venv` (`.\\.venv\\Scripts\\Activate.ps1`)
-- [ ] Run `uv pip install -e ".[dev]"` — verify zero errors
-- [ ] Run `pytest tests/` — verify all tests pass
-- [ ] Run `ruff check src/` — verify no lint errors
-- [ ] Run `python -m salareen_ex05.main --help` — verify CLI works
+- [x] Confirm Python 3.11 available
+- [x] Install `uv` globally
+- [x] Run `uv sync` to create `.venv` and install dependencies
+- [x] Run `pytest tests/` — all tests pass
+- [x] Verify CLI: `uv run python -m salareen_ex05.main --help`
 
 ---
 
 ## Phase 3: Hardware Detection Script
 
-- [ ] Implement `hardware.py`: CPU info, RAM total/available, disk free
-- [ ] Implement `hardware.py`: GPU detection (check for NVIDIA/CUDA; document absence)
-- [ ] Add `main.py` sub-command `hardware` that prints + saves JSON
-- [ ] Run the script; save output to `results/hardware_snapshot.json`
-- [ ] Update README hardware table with confirmed numbers
-- [ ] Decide final model choice based on available RAM
+- [x] Implement `hardware.py`: CPU info, RAM total/available, disk free
+- [x] Add `main.py` sub-command `hardware` that prints + saves JSON
+- [x] Run the script; save output to `results/hardware_snapshot.json`
+- [x] Installed Ollama and pulled `qwen2.5:0.5b`
+- [x] Smoke test saved to `results/ollama_smoke_test.txt`
+- [ ] Update README hardware table with confirmed numbers from snapshot
+
+---
+
+## Phase 3b: Ollama Benchmark Pipeline
+
+- [x] Create `src/salareen_ex05/ollama_benchmark.py`
+- [x] Add `ollama-benchmark` CLI command to `main.py`
+- [x] Create `data/prompts/ollama_benchmark_prompt.txt`
+- [x] Add `tests/test_ollama_benchmark.py` (mocked, no real Ollama needed)
+- [x] Add `requests>=2.31` to `pyproject.toml`
+- [ ] Run the benchmark: `uv run python -m salareen_ex05.main ollama-benchmark --model qwen2.5:0.5b --runs 3`
+- [ ] Verify `results/ollama_benchmark_qwen2_5_0_5b.json` and `.csv` are created
+- [ ] Record real TTFT / throughput numbers in README §8
 
 ---
 

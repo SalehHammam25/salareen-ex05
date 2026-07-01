@@ -117,6 +117,18 @@ def test_main_importable():
     from salareen_ex05 import main  # noqa: F401
 
 
+def test_ollama_benchmark_importable():
+    from salareen_ex05 import ollama_benchmark  # noqa: F401
+
+
+def test_ollama_benchmark_file_exists():
+    assert _p("src", "salareen_ex05", "ollama_benchmark.py").is_file()
+
+
+def test_benchmark_prompt_file_exists():
+    assert _p("data", "prompts", "ollama_benchmark_prompt.txt").is_file()
+
+
 def test_version_defined():
     import salareen_ex05
     assert hasattr(salareen_ex05, "__version__")

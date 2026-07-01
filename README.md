@@ -242,6 +242,12 @@ uv run python -m salareen_ex05.main --help
 # Hardware detection
 uv run python -m salareen_ex05.main hardware
 
+# Ollama benchmark (requires Ollama running with qwen2.5:0.5b pulled)
+uv run python -m salareen_ex05.main ollama-benchmark --model qwen2.5:0.5b --runs 1
+
+# Multiple runs for stable averages
+uv run python -m salareen_ex05.main ollama-benchmark --model qwen2.5:0.5b --runs 3
+
 # Baseline inference (model TBD after hardware check)
 uv run python -m salareen_ex05.main run baseline --model <model-id> --max-tokens 100
 
