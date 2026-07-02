@@ -3,9 +3,10 @@
 **AI Agents Architecture — Homework 05**
 **Group:** salareen | **Students:** Saleh Hammam, Areen Tarabeh
 
-> **Status: Experiment in progress — results not yet collected.**
-> This README serves as both the project guide and the final technical report skeleton.
-> Sections marked *[PENDING]* will be filled with real measurements after experiments run.
+> **Status:** Local Ollama benchmarks completed for qwen2.5:0.5b, qwen2.5:1.5b, and
+> qwen2.5:3b. AirLLM was feasibility-checked but not executed. Economic analysis is
+> assumption-based (API pricing not yet verified). See [§9 Limitations](#9-limitations)
+> and [§10 Conclusions / Summary](#10-conclusions--summary) for the full picture.
 
 ---
 
@@ -18,11 +19,13 @@
 5. [Metrics Plan](#5-metrics-plan)
 6. [Economic Analysis Plan](#6-economic-analysis-plan)
 7. [Lecture Concepts Connection](#7-lecture-concepts-connection)
-8. [Results](#8-results) *(PENDING)*
-9. [Project Structure](#9-project-structure)
-10. [Setup Instructions](#10-setup-instructions)
-11. [Running the Experiments](#11-running-the-experiments)
-12. [References](#12-references)
+8. [Results](#8-results)
+9. [Limitations](#9-limitations)
+10. [Conclusions / Summary](#10-conclusions--summary)
+11. [Project Structure](#11-project-structure)
+12. [Setup Instructions](#12-setup-instructions)
+13. [Running the Experiments](#13-running-the-experiments)
+14. [References](#14-references)
 
 ---
 
@@ -80,6 +83,25 @@ chosen carefully:
 
 Final model choice will be logged after the hardware detection script runs and confirms
 available RAM. Candidate model families: Phi-3-mini, Qwen2-0.5B/1.5B, TinyLlama, Mistral-7B.
+
+**Model choice justification (actual):** the Qwen2.5 family was selected for the
+baselines in §8, for four concrete reasons:
+
+1. **Same family across multiple sizes.** Qwen2.5 ships as 0.5B, 1.5B, and 3B variants,
+   which lets us isolate the effect of *parameter count alone* on CPU throughput while
+   holding model architecture, tokenizer, and runtime stack constant.
+2. **Available directly through Ollama.** No manual GGUF conversion or Hugging Face
+   token/download step was needed — `ollama pull qwen2.5:<size>` gives a working,
+   already-quantized (Q4_K_M) local model in one step, which matched the "CPU-only,
+   limited disk/RAM" constraint from §2.
+3. **Ollama's quantized runtime is CPU-appropriate.** llama.cpp-based Q4_K_M inference is
+   the CPU-optimized path called out in the strategy table above, so using it satisfies
+   the "GGUF / llama.cpp" row without extra tooling.
+4. **Larger candidates were deliberately avoided at this stage.** Mistral-7B (and other
+   7B+ candidates) were not pulled or benchmarked, because this machine is CPU-only with
+   no CUDA and limited free RAM (~6.8 GB at test start) — a 7B model's RAM/runtime
+   requirements made it a poor first candidate; it is instead the subject of the AirLLM
+   feasibility check in §8, rather than a direct benchmark.
 
 ---
 
@@ -147,16 +169,19 @@ token volume on-prem becomes cheaper than API.
 
 ## 7. Lecture Concepts Connection
 
-| Concept | Where it appears in this experiment |
-|---------|-------------------------------------|
-| CPU vs GPU | All inference is CPU-only; we measure the cost of no-GPU execution |
-| VRAM / RAM | RAM is the binding constraint; model must fit or be streamed |
-| Prefill vs Decode | Measured separately: TTFT captures prefill, TPOT captures decode |
-| Memory-bound vs Compute-bound | CPU inference is almost entirely memory-bandwidth-bound |
-| Virtual memory / paging / mmap | AirLLM uses mmap to stream layers; Windows page file may be hit |
-| Quantization | INT8 / Q4 reduce memory footprint; we measure accuracy/speed tradeoff |
-| AirLLM | Layer-by-layer loading avoids full-model RAM allocation |
-| SafeTensors / GGUF | Model format determines load strategy; GGUF preferred for CPU |
+This table was originally written as a plan (before any results existed); it is now
+grounded in the actual measurements from §8 wherever a real number is available.
+
+| Concept | Evidence from this project |
+|---------|------------------------------|
+| CPU vs GPU | All three Ollama baselines (§8) ran on a CPU-only machine (Intel i7-8550U, no CUDA); the AirLLM feasibility check (§8) independently confirmed `cuda_available: false` on the same hardware. |
+| VRAM / RAM | No VRAM exists on this machine (integrated GPU only); system RAM (~7–8 GB free) is the binding constraint, which is exactly why the AirLLM feasibility check flagged this environment as risky for a 7B+ model. |
+| Prefill vs Decode | Directly measured: qwen2.5:0.5b evaluated its 79-token prompt in ~108 ms (≈732 tok/s prefill) but decoded output at only ~26 tok/s; qwen2.5:3b evaluated the same 79-token prompt in ~2.94 s (≈27 tok/s prefill) and decoded at ~8.00 tok/s. Prefill is consistently faster and more parallelizable than the sequential decode step, at every model size tested. |
+| Memory-bound vs Compute-bound | Throughput fell from ~25.99 → ~15.28 → ~8.00 tok/s as model size grew 0.5B → 1.5B → 3B (roughly halving each step) while decode logic stayed identical — consistent with a memory-bandwidth-bound workload, where cost scales with weight data moved per token rather than with compute complexity. |
+| Virtual memory / paging / mmap | Discussed as AirLLM's core motivation (layer-by-layer mmap loading avoids full-model RAM allocation) but **not executed** — the AirLLM feasibility check (§8) stopped short of a real run, so paging/mmap behavior was not observed directly on this machine. |
+| Quantization | Directly measured via `ollama show`: all three baselines use `quantization: Q4_K_M` (§8 "Ollama model metadata"), a ~4-bit GGUF scheme (~4x smaller than FP16). No Q4/Q8/FP16 comparison was run — see [Limitations](#9-limitations). |
+| AirLLM | The feasibility check (§8) found `likely_compatible: No` (no CUDA, package not installed) **before** any large model was downloaded — the intended use case for a feasibility gate. |
+| SafeTensors / GGUF | Every baseline used Ollama's GGUF-format Q4_K_M weights, the CPU-optimized format called out in §3; no SafeTensors/FP16 model was loaded in this project. |
 
 ---
 
@@ -179,12 +204,29 @@ baselines below.
 Raw command output saved in `results/ollama_show_qwen2_5_0_5b.txt`,
 `results/ollama_show_qwen2_5_1_5b.txt`, and `results/ollama_models_list.txt`.
 
-> **Quantization note:** Both models are pulled from the Ollama library already
-> quantized. `ollama show qwen2.5:1.5b` reports `quantization: Q4_K_M`. This means the
-> baselines recorded in this section are **not** full-precision FP16 inference — they
-> already benefit from 4-bit quantization applied by Ollama/GGUF at model-pull time.
-> A true FP16 baseline (Phase A in §4) has not been run yet; the numbers below should be
-> read as "quantized CPU inference," not as an FP16 reference point.
+> **Quantization discussion:** all three Ollama models used in this project
+> (qwen2.5:0.5b, qwen2.5:1.5b, qwen2.5:3b) are pulled from the Ollama library
+> **already quantized** — `ollama show qwen2.5:1.5b` reports `quantization: Q4_K_M`,
+> and the same quantization applies to the other two. This means every baseline
+> recorded in this section is **not** full-precision FP16 inference; it already
+> benefits from 4-bit quantization applied by Ollama/GGUF at model-pull time.
+>
+> **What Q4_K_M means, briefly:** GGUF's `Q4_K_M` scheme stores most weights at ~4 bits
+> per parameter (with some higher-precision "K" blocks mixed in for the most sensitive
+> tensors), versus 16 bits per parameter for FP16. That is roughly a **4x reduction in
+> raw weight memory**, which is the main reason a 1.5B-parameter model can run
+> comfortably on a machine with only ~7 GB of free RAM. The expected tradeoff is a small
+> loss of numerical precision — and therefore potential output-quality degradation —
+> compared to the original FP16 weights, though this project did not measure that
+> degradation directly (see [Limitations](#9-limitations)).
+>
+> **What this project did *not* do:** it did not run a controlled Q4 vs. Q8 vs. FP16
+> comparison on the same model. All cross-model numbers in §8 compare **different
+> parameter counts at the same fixed quantization level (Q4_K_M)** — they isolate the
+> effect of model size on CPU throughput, not the effect of quantization level itself.
+> A true FP16 baseline (Phase A in §4) has not been run; the numbers below should be
+> read as "quantized CPU inference at varying model size," not as an FP16 reference
+> point or a quantization-level ablation.
 
 > **Process memory note:** A single point-in-time snapshot of the `ollama` server
 > process (`Get-Process ollama`) recorded a working set (WS) of about 62,029,824 bytes
@@ -324,10 +366,11 @@ parameters as a heavier local stress test.
 
 ---
 
-### AirLLM feasibility check *(pending full run)*
+### AirLLM feasibility check (not executed)
 
-Before attempting to download any 7B+ model for AirLLM, a lightweight, non-destructive
-feasibility check was implemented (`src/salareen_ex05/airllm_feasibility.py`,
+**AirLLM was not executed in this project.** Before attempting to download any 7B+
+model for AirLLM, a lightweight, non-destructive feasibility check was implemented
+instead (`src/salareen_ex05/airllm_feasibility.py`,
 `uv run python -m salareen_ex05.main airllm-check`). It inspects the current
 environment — Python version, OS, CUDA availability, whether the `airllm` package is
 importable, RAM/disk headroom — and writes an honest report. **It does not install
@@ -339,23 +382,32 @@ Real result from this machine, saved to `results/airllm_feasibility_report.txt` 
 | Field | Value |
 |-------|-------|
 | Python | 3.12.13 |
-| Platform | Windows-11-10.0.26200-SP0 |
-| CUDA available | No |
-| AirLLM importable | No (not installed) |
+| Platform | Windows-11-10.0.26200-SP0 (CPU-only) |
+| CUDA available | **No** |
+| AirLLM importable | **No** (not installed) |
 | RAM total / available | 15.9 GB / ~7–8 GB (fluctuates run to run) |
 | Disk free | 199.6 GB |
-| Likely compatible for a real AirLLM run | No |
+| Likely compatible for a real AirLLM run | **No** |
 
-**Interpretation:** AirLLM's layer-streaming / disk-offload approach is designed
-primarily around GPU VRAM constraints; this machine has no CUDA GPU, and the `airllm`
-package is not currently installed. Neither fact is treated as a project failure — it
-is documented here as an honest engineering finding. The Ollama GGUF/Q4_K_M results
-above (§8 Baselines 1–3) remain the CPU-only fallback baseline.
+**Summary:** on this Windows, CPU-only machine — no CUDA GPU and the `airllm` package
+not installed/importable — the feasibility check's own verdict is
+`likely_compatible = No`. AirLLM's layer-streaming / disk-offload approach is designed
+primarily around GPU VRAM constraints, which this machine simply doesn't have.
 
-**AirLLM itself has not been executed.** The next step, if pursued, is to install
-`airllm` deliberately (e.g. `uv add airllm`) and re-run `airllm-check` — only after that
-check looks reasonable would a small, deliberate model be attempted, rather than
-downloading a 7B model up front.
+**This is an engineering finding, not a project failure.** Neither "no CUDA" nor
+"package not installed" is a defect in the project — they are exactly the kind of
+result a feasibility check exists to surface *before* spending time/disk downloading a
+multi-gigabyte model that was unlikely to run well. This confirms, with real
+measurements, the caveat already predicted in
+[§4 Phase C](#4-experiment-plan): "On this CPU-only machine (no NVMe, ~6.8 GB free RAM,
+spinning or SATA SSD), AirLLM may be extremely slow ... or fail entirely." The
+feasibility check turns that prediction into a documented, reproducible result instead
+of leaving it as an assumption. The Ollama GGUF/Q4_K_M results above (§8 Baselines
+1–3) remain the CPU-only fallback baseline used in place of a real AirLLM run.
+
+**Next step, if pursued:** install `airllm` deliberately (e.g. `uv add airllm`) and
+re-run `airllm-check` — only after that check looks reasonable would a small,
+deliberate model be attempted, rather than downloading a 7B model up front.
 
 ---
 
@@ -401,6 +453,8 @@ tokens/month), saved to `results/economic_analysis.json` / `.csv` and
 
 Break-even (assumed pricing): ~53,998,334 total tokens/month.
 
+![On-Prem vs API monthly cost break-even (assumption-based)](figures/economic_break_even.png)
+
 **Interpretation (draft, assumption-dependent):** at this default workload and these
 placeholder prices, the assumed API is far cheaper — on-prem cost is dominated by
 hardware amortization ($22.22/mo of the $22.23 total), not electricity ($0.0065/mo),
@@ -413,20 +467,62 @@ general.
 
 ---
 
-> **Still pending:** actual AirLLM install/run attempt (or documented fallback),
-> explicit quantization comparison, system-level Ollama memory tracking, **verification
-> of official API pricing for the economic analysis**, comparative charts across all
-> phases, and final PDF report.
+## 9. Limitations
+
+These limitations apply to every result in §8 and should be read alongside them —
+they are not disclaimers about hypothetical problems, but a direct account of what
+was and wasn't measured.
+
+- **RAM measurements are process-level, not full model memory.** The RSS values in
+  the Ollama baselines reflect the benchmark *script* process, and the single
+  Ollama-process snapshot (~62 MB WS) is a point-in-time sample — neither is a
+  continuous or peak measurement of the Ollama server's actual model-memory
+  footprint during generation.
+- **API prices in the economic analysis are assumption-based and unverified.** The
+  $0.25/$1.25 per-1M-token defaults are configurable placeholders, not pricing
+  checked against any provider's live pricing page. The economic analysis must not
+  be treated as final until real prices are substituted.
+- **AirLLM was feasibility-checked only, not executed.** No AirLLM install, model
+  download, or inference run occurred in this project; the "No / likely
+  incompatible" result comes entirely from a static environment audit.
+- **All Ollama benchmarks use quantized (Q4_K_M) models, not an FP16 baseline.** No
+  full-precision run was performed on this hardware, so the throughput numbers in
+  §8 cannot be directly compared to an FP16 reference point.
+- **No Q4 vs. Q8 vs. FP16 quantization-level comparison was performed.** Every
+  cross-model comparison in §8 varies parameter count at a single fixed
+  quantization level; the effect of quantization level itself was not isolated.
+- **Output quality was not deeply evaluated.** Beyond confirming that each model
+  produced a coherent, on-topic response to the fixed benchmark prompt, no
+  systematic quality scoring (human rating, perplexity, or otherwise) was applied.
 
 ---
 
-## 9. Project Structure
+## 10. Conclusions / Summary
+
+CPU-only local inference is feasible for small, already-quantized models: qwen2.5:0.5b,
+1.5b, and 3b all ran successfully on this Windows laptop with no GPU. Throughput
+decreased predictably as model size increased — ~25.99 tok/s (0.5B) → ~15.28 tok/s
+(1.5B) → ~8.00 tok/s (3B) — which matches the memory-bandwidth-bound bottleneck
+expected on CPU-only hardware (§7). AirLLM itself was not executed: its own feasibility
+check reported this environment as `likely_compatible: No` (no CUDA GPU, `airllm`
+package not installed), so a 7B+ model was never downloaded, and the Ollama Q4_K_M
+baselines served as the practical fallback instead. The economic analysis is a useful,
+fully configurable comparison tool, but every dollar figure it currently produces rests
+on unverified placeholder API pricing and must not be read as a final on-prem-vs-API
+verdict. Taken together, the project's central finding is that local CPU inference is
+genuinely usable at small model sizes, but for larger or more reliability-sensitive
+workloads, either a paid API or actual GPU hardware remains the more practical choice
+on this class of machine.
+
+---
+
+## 11. Project Structure
 
 ```
 salareen-ex05/
-├── README.md                  # This file — report skeleton
+├── README.md                  # This file — project guide + technical report
 ├── pyproject.toml             # Project metadata & dependencies (uv)
-├── .env-example               # Environment variable template
+├── .env-example                # Environment variable template
 ├── docs/
 │   ├── PRD.md                 # Product Requirements Document
 │   ├── PLAN.md                # Technical architecture & experiment plan
@@ -435,26 +531,35 @@ salareen-ex05/
 ├── src/
 │   └── salareen_ex05/
 │       ├── __init__.py
-│       ├── hardware.py        # Hardware detection utilities
-│       ├── metrics.py         # Timing & memory measurement harness
-│       ├── costs.py           # On-prem vs API economic model
-│       ├── plots.py           # Matplotlib chart generators
-│       └── main.py            # CLI entry point (typer)
+│       ├── hardware.py            # Hardware detection utilities
+│       ├── metrics.py             # Timing & memory measurement harness
+│       ├── ollama_benchmark.py    # Ollama HTTP API benchmark runner
+│       ├── airllm_feasibility.py  # AirLLM environment feasibility check (no download)
+│       ├── costs.py               # On-prem vs API economic model (assumption-based)
+│       ├── economic_cli.py        # CLI orchestration for the `costs` command
+│       ├── plots.py               # Matplotlib chart generators
+│       └── main.py                # CLI entry point (typer)
 ├── experiments/               # Experiment runner scripts
-├── results/                   # Raw JSON/CSV results (git-ignored if large)
+├── results/                   # Raw JSON/CSV/TXT results (hardware, Ollama, AirLLM, economic)
 ├── reports/                   # Generated PDF/HTML reports
-├── figures/                   # Saved chart images
-├── data/                      # Prompts, reference answers, etc.
+├── figures/                   # Saved chart images (benchmarks + economic break-even)
+├── data/
+│   └── prompts/                   # Fixed benchmark prompt(s)
 ├── scripts/                   # One-off helper scripts
 └── tests/
     ├── __init__.py
+    ├── conftest.py
     ├── test_project_structure.py
-    └── test_metrics.py
+    ├── test_metrics.py
+    ├── test_ollama_benchmark.py
+    ├── test_airllm_feasibility.py
+    ├── test_costs.py
+    └── test_plots.py
 ```
 
 ---
 
-## 10. Setup Instructions
+## 12. Setup Instructions
 
 ### Prerequisites
 - Windows 11, Python 3.11 (recommended), `uv` installed globally
@@ -483,7 +588,7 @@ uv run python -m salareen_ex05.main --help
 
 ---
 
-## 11. Running the Experiments
+## 13. Running the Experiments
 
 ```powershell
 # Hardware detection
@@ -516,7 +621,7 @@ uv run python -m salareen_ex05.main plots --results-file results/ollama_benchmar
 
 ---
 
-## 12. References
+## 14. References
 
 - AirLLM GitHub: https://github.com/lyogavin/airllm
 - llama.cpp: https://github.com/ggerganov/llama.cpp

@@ -389,4 +389,87 @@ report exist. The dollar figures are draft/assumption-based and explicitly
 labeled as such everywhere they appear; verifying real API pricing remains the
 one clearly flagged pending step before this section can be called final.
 
+## Entry 010 — 2026-07-02
+
+**Purpose:** Audit the README/project (read-only, no edits) against the assignment's
+"deep technical report" requirements, then apply a prioritized round of polishing
+edits based on that audit — no new experiments, no changed benchmark numbers.
+
+**Tool used:** Claude (Anthropic) via VS Code Claude Code extension.
+
+**Step 1 — Audit (no files modified):** produced a PASS/WEAK/MISSING checklist
+against 10 questions (requirement coverage, placeholder sections, AirLLM honesty,
+quantization depth, economic labeling, limitations, conclusions, figure references,
+overclaiming, and a prioritized fix list). Key findings: stale top banner and ToC
+"(PENDING)" tag contradicted the real results already in §8; no model-choice
+justification for Qwen2.5 specifically; AirLLM section didn't connect its result back
+to the §4 Phase C prediction it confirmed; quantization discussion flagged Q4_K_M but
+never explained the mechanism or the "no Q4/Q8/FP16 comparison" gap; the economic
+figure (`economic_break_even.png`) was named in text but never embedded; §7 Lecture
+Concepts was written in plan-tense before results existed and never cited real
+numbers; no consolidated Limitations section; no final Conclusions section; §9/§11
+Project Structure tree was missing `ollama_benchmark.py`, `airllm_feasibility.py`,
+`economic_cli.py`, and 4 of 6 test files.
+
+**Key constraints given for the edit pass:**
+- Do not change benchmark results or fake any missing experiments.
+- Do not claim AirLLM was executed or that official API prices were verified.
+- Do not modify source code unless absolutely necessary (none was modified).
+- Keep it to README/docs edits only.
+
+**Changes made (all in `README.md` unless noted):**
+- Top status banner rewritten to state real status: Ollama baselines complete for
+  0.5b/1.5b/3b, AirLLM feasibility-checked but not executed, economic analysis
+  assumption-based — replacing the stale "results not yet collected" line.
+- Table of Contents: removed the stale "*(PENDING)*" tag on Results; added new
+  entries 9 (Limitations) and 10 (Conclusions / Summary); renumbered Project
+  Structure/Setup/Running/References to 11–14.
+- §3 Model-Selection Strategy: added an explicit 4-point "Model choice
+  justification" — same family across sizes, Ollama-native availability, CPU-
+  appropriate quantized runtime, and why Mistral-7B/7B+ candidates were deliberately
+  not pulled (CPU-only, limited RAM; deferred to the AirLLM feasibility check).
+- §8 AirLLM feasibility subsection: retitled "(not executed)"; added an explicit
+  "Summary" line stating the Windows/CPU-only/no-CUDA/not-installed/likely-
+  incompatible result; added a paragraph explicitly linking this result back to the
+  §4 Phase C prediction it confirms, framed as an engineering finding, not a
+  failure.
+- §8 quantization note: expanded into a fuller "Quantization discussion" — explains
+  what Q4_K_M does (~4-bit weights, ~4x memory reduction vs. FP16, expected
+  precision/quality tradeoff) and explicitly states no Q4/Q8/FP16 comparison was
+  run; all cross-model numbers vary parameter count at one fixed quant level.
+- §8 economic analysis: embedded `figures/economic_break_even.png` with a Markdown
+  image tag (previously only named in text).
+- §7 Lecture Concepts Connection: rewritten row-by-row to cite actual measured
+  evidence — CPU-only confirmed by both benchmarks and the AirLLM check; prefill
+  vs. decode cited from the 0.5b (~732 tok/s prefill / ~26 tok/s decode) and 3b
+  (~27 tok/s prefill / ~8 tok/s decode) numbers; memory-bound trend cited from the
+  25.99→15.28→8.00 tok/s drop; quantization cited from the `ollama show` Q4_K_M
+  metadata; AirLLM and virtual-memory/mmap rows explicitly marked as
+  feasibility-only / not executed.
+- New §9 Limitations: six consolidated bullets (process-level RAM only,
+  unverified API pricing, AirLLM feasibility-only, Q4_K_M-not-FP16 baselines, no
+  quantization-level comparison, output quality not deeply evaluated) — replacing
+  the old scattered "Still pending" callout.
+- New §10 Conclusions / Summary: 5-sentence synthesis — CPU-only inference is
+  feasible for small quantized models; throughput drop matches the expected
+  memory-bandwidth bottleneck; AirLLM wasn't run because its own feasibility check
+  said this environment was unlikely to work; the economic analysis is useful but
+  assumption-based; the overall takeaway is that on-prem CPU inference is viable at
+  small scale but API/GPU remains more practical for larger or reliability-sensitive
+  workloads.
+- §11 Project Structure: regenerated the file tree to include
+  `ollama_benchmark.py`, `airllm_feasibility.py`, `economic_cli.py`, `conftest.py`,
+  and all six real test files (previously only 2 of 6 were listed).
+- `docs/TODO.md` — marked the final README audit/polish as complete in Phase 8,
+  with a description of exactly what changed; kept final proofreading, `pytest`/
+  `ruff` re-run, official API price verification, PDF generation, and the actual
+  git submission steps as pending.
+- `docs/PROMPT_LOG.md` — this entry.
+
+**Outcome:** README now reads as a coherent, internally-consistent technical report
+with an honest status banner, a synthesized conclusion, a consolidated limitations
+section, and every figure embedded. No benchmark numbers, source code, or test
+results were changed — this was a documentation-only polishing pass. Official API
+price verification and final PDF/submission steps remain explicitly pending.
+
 <!-- Add new entries below this line -->

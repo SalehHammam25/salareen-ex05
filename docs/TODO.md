@@ -148,10 +148,23 @@ Mark tasks with `[x]` when complete.
 
 ## Phase 8: Final Report & Submission
 
-- [ ] Fill in README §8 Results with real data and figures
-- [ ] Fill in README §6 Economic Analysis with real numbers
-- [ ] Proof-read entire README
+- [x] Fill in README §8 Results with real data and figures
+- [x] Fill in README §6 Economic Analysis area — actual results now live in the
+      §8 "Economic Analysis — Assumption-Based Draft" subsection, clearly labeled
+      as unverified/assumption-based
+- [x] Final README audit and polish — fixed stale top banner and ToC "(PENDING)"
+      tag, added explicit model-choice justification (§3), strengthened the
+      AirLLM feasibility narrative (linked to the §4 Phase C prediction it
+      confirms), strengthened the quantization discussion (Q4_K_M mechanism +
+      explicit "no Q4/Q8/FP16 comparison" caveat), embedded the
+      `economic_break_even.png` figure, rewrote §7 Lecture Concepts to cite
+      actual measured numbers, added a consolidated §9 Limitations section, and
+      added a §10 Conclusions/Summary section; regenerated §11 Project Structure
+      to match the real file tree (see `docs/PROMPT_LOG.md` Entry 010)
+- [ ] Proof-read entire README once more before submission
 - [ ] Run `pytest` and `ruff check` one final time
+- [ ] **Verify official API prices before final submission** (still pending —
+      see README §9 Limitations)
 - [ ] Generate PDF (`pandoc README.md -o salareen-ex05.pdf` or browser print)
 - [ ] Verify PDF is readable and figures render
 - [ ] `git add`, `git commit -m "final submission"`, `git push`
