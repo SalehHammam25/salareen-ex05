@@ -73,7 +73,16 @@ Mark tasks with `[x]` when complete.
 - [x] Generate figure: `figures/ollama_benchmark_qwen2_5_3b_summary.png`
 - [x] Add Baseline 3 (qwen2.5:3b) and expanded 3-model cross-model comparison to README §8
 - [ ] Test a larger model (≥ 7B) or GGUF-quantized variant
-- [ ] Attempt AirLLM layer-streaming on 7B model; document success or failure
+- [x] Implement `src/salareen_ex05/airllm_feasibility.py` + `airllm-check` CLI command
+      (environment audit only — no install, no download, no model run)
+- [x] Run `airllm-check` on this machine; save
+      `results/airllm_feasibility_report.txt` / `.json`; add "AirLLM feasibility check"
+      subsection to README §8 (result: not CUDA-capable, `airllm` not installed,
+      likely_compatible = No)
+- [ ] **Next:** if pursued, deliberately install `airllm` (`uv add airllm`), re-run
+      `airllm-check`, then attempt a small, controlled AirLLM smoke test — do **not**
+      download a 7B+ model until feasibility looks reasonable. Document success or
+      failure either way.
 - [ ] Run explicit quantization comparison (current baselines are Q4_K_M only; no
       FP16/other quantization level has been compared yet)
 - [ ] Run economic analysis: `uv run python -m salareen_ex05.main costs --tokens-per-sec 15.28`

@@ -324,9 +324,44 @@ parameters as a heavier local stress test.
 
 ---
 
-> **Still pending:** AirLLM / fallback attempt, explicit quantization comparison,
-> system-level Ollama memory tracking, economic analysis, comparative charts across
-> all phases, and final PDF report.
+### AirLLM feasibility check *(pending full run)*
+
+Before attempting to download any 7B+ model for AirLLM, a lightweight, non-destructive
+feasibility check was implemented (`src/salareen_ex05/airllm_feasibility.py`,
+`uv run python -m salareen_ex05.main airllm-check`). It inspects the current
+environment — Python version, OS, CUDA availability, whether the `airllm` package is
+importable, RAM/disk headroom — and writes an honest report. **It does not install
+AirLLM, download any model, or run inference.**
+
+Real result from this machine, saved to `results/airllm_feasibility_report.txt` /
+`.json`:
+
+| Field | Value |
+|-------|-------|
+| Python | 3.12.13 |
+| Platform | Windows-11-10.0.26200-SP0 |
+| CUDA available | No |
+| AirLLM importable | No (not installed) |
+| RAM total / available | 15.9 GB / ~7–8 GB (fluctuates run to run) |
+| Disk free | 199.6 GB |
+| Likely compatible for a real AirLLM run | No |
+
+**Interpretation:** AirLLM's layer-streaming / disk-offload approach is designed
+primarily around GPU VRAM constraints; this machine has no CUDA GPU, and the `airllm`
+package is not currently installed. Neither fact is treated as a project failure — it
+is documented here as an honest engineering finding. The Ollama GGUF/Q4_K_M results
+above (§8 Baselines 1–3) remain the CPU-only fallback baseline.
+
+**AirLLM itself has not been executed.** The next step, if pursued, is to install
+`airllm` deliberately (e.g. `uv add airllm`) and re-run `airllm-check` — only after that
+check looks reasonable would a small, deliberate model be attempted, rather than
+downloading a 7B model up front.
+
+---
+
+> **Still pending:** actual AirLLM install/run attempt (or documented fallback),
+> explicit quantization comparison, system-level Ollama memory tracking, economic
+> analysis, comparative charts across all phases, and final PDF report.
 
 ---
 

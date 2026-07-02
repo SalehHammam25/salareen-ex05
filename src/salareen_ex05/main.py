@@ -5,6 +5,7 @@ Sub-commands:
   costs             — run economic analysis
   plots             — generate charts from saved results
   ollama-benchmark  — benchmark a local Ollama model
+  airllm-check      — check AirLLM feasibility on this machine (no model download)
   run               — [future] run a transformers inference experiment
 """
 
@@ -32,10 +33,8 @@ def hardware(
 ) -> None:
     """Detect and display hardware information."""
     from salareen_ex05 import hardware as hw
-
     snap = hw.collect()
     hw.print_report(snap)
-
     if save:
         out = RESULTS_DIR / "hardware_snapshot.json"
         hw.save_snapshot(snap, out)
@@ -52,7 +51,6 @@ def costs(
 ) -> None:
     """Compute and display economic comparison: on-prem vs API."""
     from salareen_ex05.costs import print_comparison
-
     print_comparison(monthly_input_tokens, monthly_output_tokens, tokens_per_sec)
 
 
@@ -72,7 +70,6 @@ def plots(
         return
 
     from salareen_ex05 import plots as plt_mod
-
     data = plt_mod.load_results(results_file)
     if not data:
         console.print("[red]Results file is empty.[/red]")
@@ -97,7 +94,6 @@ def ollama_benchmark(
 ) -> None:
     """Benchmark a local Ollama model and save results to results/."""
     from salareen_ex05.ollama_benchmark import run_benchmark, save_results
-
     default_prompt_path = Path(__file__).parent.parent.parent / "data" / "prompts" / "ollama_benchmark_prompt.txt"
     if prompt_file and prompt_file.exists():
         prompt = prompt_file.read_text(encoding="utf-8").strip()
@@ -108,7 +104,6 @@ def ollama_benchmark(
 
     console.print(f"[cyan]Benchmarking {model} ({runs} run(s))...[/cyan]")
     results = run_benchmark(model, prompt, runs=runs, url=url)
-
     if any(r.error for r in results):
         console.print("[red]Benchmark failed — see error above.[/red]")
         raise typer.Exit(code=1)
@@ -116,7 +111,6 @@ def ollama_benchmark(
     stem = f"ollama_benchmark_{model.replace(':', '_').replace('.', '_')}"
     json_path, csv_path = save_results(results, stem)
     console.print(f"[green]Saved:[/green] {json_path.name}  {csv_path.name}")
-
     tps_vals = [r.tokens_per_sec for r in results if r.tokens_per_sec]
     if tps_vals:
         console.print(f"  Avg throughput : {sum(tps_vals)/len(tps_vals):.2f} tok/s")
@@ -124,23 +118,28 @@ def ollama_benchmark(
     console.print(f"  Avg wall-clock : {avg_rt:.2f} s")
 
 
+@app.command(name="airllm-check")
+def airllm_check(
+    save: bool = typer.Option(True, help="Save report to results/airllm_feasibility_report.*"),
+) -> None:
+    """Check AirLLM feasibility on this machine. Does not install or download anything."""
+    from salareen_ex05.airllm_feasibility import collect, format_report, save_report
+    report = collect()
+    console.print(format_report(report))
+    if save:
+        txt_path, json_path = save_report(report)
+        console.print(f"[green]Saved:[/green] {txt_path.name}  {json_path.name}")
+
+
 @app.command(name="run")
 def run_experiment(
-    method: str = typer.Argument(
-        help="Inference method: baseline | gguf | airllm | int8"
-    ),
+    method: str = typer.Argument(help="Inference method: baseline | gguf | airllm | int8"),
     model: str = typer.Option(..., help="Model ID or path"),
     max_tokens: int = typer.Option(100, help="Number of tokens to generate"),
     prompt_file: Optional[Path] = typer.Option(None, help="Path to prompt text file"),
 ) -> None:
-    """Run a single inference experiment. [NOT YET IMPLEMENTED]
-
-    This command is a placeholder. Implementations will be added in Phase 4–5.
-    """
-    console.print(
-        f"[yellow]run-experiment for method='{method}' model='{model}' is not yet implemented.[/yellow]\n"
-        "See docs/PLAN.md Phase 4–5 for the implementation roadmap."
-    )
+    """Run a single inference experiment. [NOT YET IMPLEMENTED] — see docs/PLAN.md Phase 4–5."""
+    console.print(f"[yellow]'{method}' for '{model}' not implemented — see docs/PLAN.md Phase 4–5.[/yellow]")
     raise typer.Exit(code=1)
 
 

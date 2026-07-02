@@ -1,0 +1,18 @@
+=== AirLLM Feasibility Report ===
+Generated at   : 2026-07-02T18:53:42.444682+00:00
+Platform       : Windows-11-10.0.26200-SP0
+Python         : 3.12.13
+CUDA available : NO
+AirLLM import  : NO
+RAM total/free : 15.9 GB / 7.8 GB
+Disk free      : 199.6 GB
+Likely compatible: NO
+
+Notes:
+  - AirLLM is not installed (documented finding, not a failure).
+  - No CUDA GPU; AirLLM's CPU-only path is unsupported and very slow.
+  - Windows per-layer disk I/O is less proven than Linux; may be unstable.
+  - Only ~7.8 GB RAM free; a 7B+ model will be tight.
+
+Recommended next action:
+  Do not download a large model yet. Install AirLLM deliberately (`uv add airllm`), then re-run `airllm-check`.

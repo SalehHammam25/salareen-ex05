@@ -263,4 +263,57 @@ comparison to three models in README §8.
 three-way comparison. AirLLM, full quantization comparison, system-level memory
 profiling, and economic analysis remain pending.
 
+## Entry 008 — 2026-07-02
+
+**Purpose:** Implement an AirLLM feasibility/fallback documentation step — an
+environment audit only, with no large model download and no AirLLM execution.
+
+**Tool used:** Claude (Anthropic) via VS Code Claude Code extension.
+
+**Context at the time of this prompt:**
+- Ollama baselines complete for qwen2.5:0.5b, qwen2.5:1.5b, qwen2.5:3b.
+- Machine: Intel i7-8550U, 16 GB RAM, no NVIDIA/CUDA, Windows, `uv` env, Python 3.12.
+
+**Key constraints given:**
+- Do NOT download a 7B model.
+- Do NOT run AirLLM automatically.
+- Do NOT fake AirLLM results.
+- Do NOT claim AirLLM worked.
+- Keep every source file under 150 lines.
+
+**Files created/modified:**
+- `src/salareen_ex05/airllm_feasibility.py` — created (149 lines): `FeasibilityReport`
+  dataclass; `_check_cuda()` / `_check_airllm()` (pure import checks, no downloads);
+  `_evaluate()` (pure compatibility logic — flags missing AirLLM, no CUDA, Windows I/O
+  uncertainty, low RAM/disk); `collect()`; `format_report()`; `save_report()` writing
+  `.txt` and `.json`.
+- `src/salareen_ex05/main.py` — added `airllm-check` CLI command (saves to
+  `results/airllm_feasibility_report.txt` / `.json`); updated module docstring.
+- `tests/test_airllm_feasibility.py` — created: 10 tests using `sys.modules`
+  monkeypatching (setting `airllm`/`torch` to `None` or a fake module) so the suite
+  never depends on AirLLM/torch actually being installed.
+- `tests/test_project_structure.py` — added importability/file-existence checks for
+  the new module.
+- `README.md` §8 — added "AirLLM feasibility check *(pending full run)*" subsection
+  with the real report table from this machine (Python 3.12.13, Windows, no CUDA,
+  `airllm` not installed, RAM 15.9/7.3 GB, disk 199.6 GB free, likely_compatible = No),
+  an honest interpretation, and an explicit statement that AirLLM itself has not been
+  executed; updated the "Still pending" callout accordingly.
+- `docs/TODO.md` — marked the feasibility module/CLI and the real feasibility-check run
+  as complete; added an explicit next-step item (install AirLLM deliberately, re-check,
+  then a small controlled smoke test — no 7B download yet); kept the actual AirLLM
+  run/fallback as pending.
+- `docs/PROMPT_LOG.md` — this entry.
+
+**Real data produced by running `airllm-check` on this machine (not fabricated):**
+- Python 3.12.13, Platform Windows-11-10.0.26200-SP0
+- CUDA available: No; AirLLM importable: No
+- RAM total/available: 15.9 GB / 7.3 GB; Disk free: 199.6 GB
+- likely_compatible: No
+- Saved to `results/airllm_feasibility_report.txt` and `results/airllm_feasibility_report.json`
+
+**Outcome:** Feasibility-check tooling implemented and actually run once (safe,
+no-download). AirLLM package is not installed and this machine has no CUDA, so a real
+AirLLM run remains pending and is documented as such — not claimed as working.
+
 <!-- Add new entries below this line -->
