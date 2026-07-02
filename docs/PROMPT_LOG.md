@@ -221,4 +221,46 @@ AirLLM, quantization, economic analysis, and final report remain pending.
 snapshot, clearly scoped as partial. AirLLM, full-precision baseline, continuous memory
 profiling, and economic analysis remain pending.
 
+## Entry 007 — 2026-07-02
+
+**Purpose:** Add the real qwen2.5:3b benchmark result and expand the cross-model
+comparison to three models in README §8.
+
+**Tool used:** Claude (Anthropic) via VS Code Claude Code extension.
+
+**Real data provided by user (not fabricated):**
+- Model: `qwen2.5:3b` via Ollama HTTP API, same fixed prompt as Baselines 1 and 2
+- Wall-clock runtime: 32.2096 s
+- Prompt tokens: 79, prompt_eval_duration: 2,938,253,000 ns
+- Output tokens: 183, eval_duration: 22,868,450,000 ns
+- Throughput: 8.002 tokens/sec
+- Process RSS before: 37.45 MB, after: 38.53 MB, delta: 1.08 MB
+- Figure: `figures/ollama_benchmark_qwen2_5_3b_summary.png` (verified present in `figures/`)
+
+**Key constraints given:**
+- Do not fake results.
+- Do not claim AirLLM was tested yet.
+- Do not claim full quantization comparison is complete.
+- Keep writing technical, honest, and concise.
+- RAM values are process-level only; full system-level memory profiling still pending.
+
+**Changes made:**
+- `README.md` §8 — added "Baseline 3: Ollama qwen2.5:3b" subsection (metrics table,
+  RAM note, figure reference); expanded "Cross-model Comparison" to a three-row table
+  (0.5b / 1.5b / 3b) with an updated 6-point analysis (throughput drop across all three
+  models, runtime increase despite fewer output tokens, CPU-only bottleneck trend, 3B as
+  a useful stress test rather than a "massive LLM," RSS overhead being negligible, and
+  next steps toward AirLLM/fallback and explicit quantization discussion); updated the
+  "Still pending" callout to reflect AirLLM/fallback, quantization comparison,
+  system-level memory tracking, economic analysis, and final report as open.
+- `docs/TODO.md` — marked the qwen2.5:3b benchmark run, its figure, and the README
+  update as complete; added an explicit pending item for a quantization-level
+  comparison; kept AirLLM/fallback, system-level memory profiling, economic analysis,
+  and final PDF/report as pending.
+- `docs/PROMPT_LOG.md` — this entry.
+
+**Outcome:** README now documents three real baselines (0.5B/1.5B/3B) with an honest
+three-way comparison. AirLLM, full quantization comparison, system-level memory
+profiling, and economic analysis remain pending.
+
 <!-- Add new entries below this line -->

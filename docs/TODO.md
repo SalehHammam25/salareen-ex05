@@ -69,8 +69,13 @@ Mark tasks with `[x]` when complete.
       `Get-Process ollama`); document as a snapshot only, not full profiling
 - [ ] Measure system-level Ollama server memory with continuous/peak tracking during
       generation (precise memory profiling — snapshot above is not sufficient)
+- [x] Run qwen2.5:3b stress-test benchmark (8.00 tok/s, 32.21 s, 183 output tokens)
+- [x] Generate figure: `figures/ollama_benchmark_qwen2_5_3b_summary.png`
+- [x] Add Baseline 3 (qwen2.5:3b) and expanded 3-model cross-model comparison to README §8
 - [ ] Test a larger model (≥ 7B) or GGUF-quantized variant
 - [ ] Attempt AirLLM layer-streaming on 7B model; document success or failure
+- [ ] Run explicit quantization comparison (current baselines are Q4_K_M only; no
+      FP16/other quantization level has been compared yet)
 - [ ] Run economic analysis: `uv run python -m salareen_ex05.main costs --tokens-per-sec 15.28`
 - [ ] Generate final comparative plots across all phases
 - [ ] Write final README report and generate `salareen-ex05.pdf`

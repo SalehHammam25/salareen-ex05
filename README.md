@@ -264,37 +264,67 @@ Second inference result, same hardware, same fixed prompt, model scaled up to 1.
 
 ---
 
+### Baseline 3: Ollama — qwen2.5:3b (CPU-only)
+
+Third inference result, same hardware, same fixed prompt, model scaled up to 3B
+parameters as a heavier local stress test.
+
+| Metric | Value |
+|--------|-------|
+| Model | qwen2.5:3b (3B parameters) |
+| Total wall-clock runtime | 32.21 s |
+| Prompt tokens (prompt_eval_count) | 79 |
+| Prompt eval duration | 2,938,253,000 ns (≈ 2.94 s) |
+| Output tokens (eval_count) | 183 |
+| Eval (decode) duration | 22,868,450,000 ns (≈ 22.87 s) |
+| **Throughput** | **8.00 tokens/sec** |
+| Process RSS before (script only) | 37.45 MB |
+| Process RSS after (script only) | 38.53 MB |
+| Process RSS delta | 1.08 MB |
+
+> **RAM note:** As with the previous two baselines, these RSS values are process-level
+> figures captured by the benchmark wrapper, not the Ollama server/model footprint.
+> Full system-level memory profiling of the Ollama process during generation is still
+> pending.
+
+![Ollama qwen2.5:3b benchmark summary](figures/ollama_benchmark_qwen2_5_3b_summary.png)
+
+---
+
 ### Cross-model Comparison
 
 | Model | Runtime (s) | Prompt tokens | Output tokens | Throughput (tok/s) | Script RSS delta (MB) |
 |-------|-------------|---------------|---------------|--------------------|-----------------------|
 | qwen2.5:0.5b | 17.31 | 79 | 270 | **25.99** | 1.53 |
 | qwen2.5:1.5b | 26.77 | 79 | 295 | **15.28** | 1.13 |
-| Throughput ratio | — | — | — | 0.59× (1.5b / 0.5b) | — |
+| qwen2.5:3b | 32.21 | 79 | 183 | **8.00** | 1.08 |
+| Throughput ratio | — | — | — | 0.59× (1.5b / 0.5b), 0.52× (3b / 1.5b) | — |
 
 #### Analysis
 
-- **Throughput dropped from ~26.0 to ~15.3 tok/s (−41%) as model size tripled from
-  0.5B to 1.5B.** This is consistent with a memory-bandwidth-bound workload: a larger
-  model has proportionally more weight data that must be streamed through the CPU cache
-  on every decode step.
-- **Runtime increased from 17.3 s to 26.8 s (+55%)** for a similar output length,
-  confirming that the decode phase scales roughly linearly with model size on CPU.
-- **Prefill cost is more sensitive to model size than decode throughput alone:**
-  prompt eval duration grew from ~108 ms (0.5B) to ~1,450 ms (1.5B) — a 13× increase
-  for only a 3× parameter increase, suggesting additional memory-allocation overhead
-  at first load.
-- **Both models are still far smaller than the "massive LLM" target.** A 7B model at
-  this scaling trend would project to roughly 4–6 tok/s on this hardware, making
-  interactive use marginal. The next phase must quantify this with either a direct
-  7B test, a GGUF-quantized model, or AirLLM layer-streaming.
-- **Script-level RSS deltas are small and similar across both runs.** This confirms
-  that the benchmark wrapper itself has negligible memory overhead; the real model
-  footprint lives in the Ollama server process.
+- **Throughput drops from ~25.99 to ~15.28 to ~8.00 tok/s** as model size scales
+  0.5B → 1.5B → 3B. Each step down is roughly a halving, consistent with a
+  memory-bandwidth-bound workload where decode cost scales with the amount of weight
+  data streamed through the CPU cache per token.
+- **Runtime increases from ~17.31 s to ~26.77 s to ~32.21 s** across the same three
+  models, even though the 3B run produced fewer output tokens (183 vs. 270/295) —
+  the added per-token latency outweighs the shorter output.
+- **This supports the expected CPU-only bottleneck trend:** larger models require
+  proportionally more computation and memory movement per decode step, with no GPU to
+  absorb the extra bandwidth demand.
+- **qwen2.5:3b is still not a "massive LLM"** by the standard of this assignment, but
+  at 8 tok/s it is already a useful local stress test on this hardware — it marks the
+  practical edge of comfortable interactive use before the next scale jump (7B+).
+- **Script-level RSS deltas remain small and similar across all three runs** (~1.0–1.5
+  MB), confirming the benchmark wrapper itself has negligible overhead; the real model
+  memory footprint lives in the Ollama server process and is not yet measured here.
+- **Next phase** should move toward AirLLM / a documented fallback for a larger model,
+  and a more explicit quantization / system-level memory discussion, rather than
+  further small-model CPU scaling points.
 
 ---
 
-> **Still pending:** larger model / quantization experiment, AirLLM / fallback,
+> **Still pending:** AirLLM / fallback attempt, explicit quantization comparison,
 > system-level Ollama memory tracking, economic analysis, comparative charts across
 > all phases, and final PDF report.
 
