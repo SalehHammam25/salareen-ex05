@@ -1,0 +1,21 @@
+[
+  {
+    "model": "qwen2.5:3b",
+    "run_index": 1,
+    "prompt_chars": 261,
+    "response_chars": 1088,
+    "total_runtime_sec": 32.20957869999995,
+    "total_duration_ns": 30157901500,
+    "load_duration_ns": 4331949500,
+    "prompt_eval_count": 79,
+    "prompt_eval_duration_ns": 2938253000,
+    "eval_count": 183,
+    "eval_duration_ns": 22868845000,
+    "tokens_per_sec": 8.002153147655687,
+    "ram_before_mb": 37.4453125,
+    "ram_after_mb": 38.52734375,
+    "ram_delta_mb": 1.08203125,
+    "response_text": "In the pre-fill phase of a large language model's inference process, the system prepares input data for processing by loading it into cache or directly into the model's memory buffer. This phase is crucial as it optimizes subsequent compute operations, reducing access time and minimizing latency.\n\nThe decode phase involves decoding the output from the model back into human-readable text after computations have been performed. It utilizes significant computational resources such as CPU cores for language generation tasks like beam search or sampling. Due to the sequential nature of text generation and the limited memory bandwidth available on CPU hardware compared to specialized AI accelerators like GPUs, the decode phase is often slower because it can't parallelize operations across multiple threads or cores effectively due to latency in memory access.\n\nThus, while pre-fill optimizes performance by setting up resources efficiently, the decode phase's speed limitations are mainly attributed to the constraints of CPU architecture for complex and sequential processing tasks.",
+    "error": null
+  }
+]
