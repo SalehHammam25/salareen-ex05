@@ -316,4 +316,77 @@ environment audit only, with no large model download and no AirLLM execution.
 no-download). AirLLM package is not installed and this machine has no CUDA, so a real
 AirLLM run remains pending and is documented as such — not claimed as working.
 
+## Entry 009 — 2026-07-02
+
+**Purpose:** Implement the economic analysis phase (on-prem vs. API), as a
+configurable, assumption-based draft — not a final verified comparison.
+
+**Tool used:** Claude (Anthropic) via VS Code Claude Code extension.
+
+**Context at the time of this prompt:**
+- Hardware snapshot, Ollama baselines (0.5b/1.5b/3b), figures, metadata/memory
+  snapshot, and AirLLM feasibility check were all already complete.
+- `src/salareen_ex05/costs.py` existed from Phase 1 but had hardcoded
+  provider-named pricing (Claude 3 Haiku / GPT-4o-mini) presented without an
+  explicit "unverified" label.
+
+**Key constraints given:**
+- Do NOT fake official current API pricing.
+- Do NOT hardcode pricing as if it is verified — use configurable defaults,
+  clearly labeled as assumptions.
+- Do NOT claim the economic analysis is final until prices are verified.
+- Do not call external APIs.
+- Keep every source file under 150 lines.
+
+**Changes made:**
+- `src/salareen_ex05/costs.py` — rewritten: dropped the two named-provider
+  configs in favor of one fully configurable `ApiCostConfig` with an explicit
+  "ASSUMED default ... NOT verified" module comment; added `avg_power_watts`
+  (renamed from `cpu_tdp_watts`), `breakeven_curve_data()`, and `save_results()`
+  (JSON with assumptions/warning block + CSV of cost rows); `print_comparison()`
+  now takes configs directly and returns `(api_result, onprem_result,
+  breakeven_tokens)`. Trimmed to 148 lines (from an initial 171-line draft) by
+  condensing return statements, notes strings, and print formatting.
+- `src/salareen_ex05/economic_cli.py` — created (47 lines): holds the `costs`
+  command's orchestration logic (build configs → print → save → generate the
+  break-even figure), kept separate from both `costs.py` (to leave it free of
+  CLI/plotting deps) and `main.py` (to keep the 150-line budget, since the
+  `costs` command needs 11 CLI flags).
+- `src/salareen_ex05/main.py` — `costs` command expanded to 11 flags: token
+  volumes, API input/output price per 1M (assumed, unverified), API label,
+  hardware price, amortization years, electricity cost/kWh, avg power watts,
+  save toggle; body now just delegates to `economic_cli.run_costs_command()`.
+  Removed an unused `json` import (F401) freed up a line. Trimmed to exactly
+  150 lines.
+- `src/salareen_ex05/plots.py` — unchanged; its existing `cost_breakeven_curve()`
+  already supported an arbitrary `filename`, so it's reused directly with
+  `filename="economic_break_even.png"` rather than adding new plotting code.
+- `tests/test_costs.py` — created (11 tests): API/on-prem cost math, zero-token
+  edge cases, break-even monotonicity/bounds, curve-data shape, `print_comparison`
+  output content (via `capsys`), and `save_results` JSON/CSV content — all fast,
+  no network, no real Ollama/AirLLM required.
+- `tests/test_project_structure.py` — added an `economic_cli` import/file-exists
+  check; trimmed to 148 lines to stay under the limit.
+- `README.md` — added "Economic Analysis — Assumption-Based Draft" subsection:
+  assumptions table (all CLI-overridable), the API and on-prem cost formulas,
+  an explicit "pricing has not been verified" warning, and a generated draft
+  result table (from `uv run python -m salareen_ex05.main costs` with defaults:
+  API $0.50/mo vs. on-prem $22.23/mo at 1M input + 200K output tokens/month,
+  break-even ≈ 53,998,334 tokens/month) with an interpretation that explicitly
+  says the conclusion depends on the unverified assumed API price. Updated the
+  "Still pending" callout to include price verification.
+- `docs/TODO.md` — marked the economic analysis draft implementation as done in
+  both Phase 3b and Phase 7; added an explicit pending item, "Verify official
+  API prices before final submission," left unchecked.
+- `docs/PROMPT_LOG.md` — this entry.
+
+**Real output produced by running the CLI on this machine (not fabricated,
+generated with default/assumed inputs):** `results/economic_analysis.json`,
+`results/economic_analysis.csv`, `figures/economic_break_even.png`.
+
+**Outcome:** A working, testable, fully configurable economic-analysis CLI and
+report exist. The dollar figures are draft/assumption-based and explicitly
+labeled as such everywhere they appear; verifying real API pricing remains the
+one clearly flagged pending step before this section can be called final.
+
 <!-- Add new entries below this line -->

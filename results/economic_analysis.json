@@ -1,0 +1,36 @@
+{
+  "assumptions": {
+    "api": {
+      "provider": "Generic API (assumed \u2014 unverified)",
+      "input_price_per_m": 0.25,
+      "output_price_per_m": 1.25
+    },
+    "onprem": {
+      "hardware_purchase_usd": 800.0,
+      "depreciation_years": 3.0,
+      "avg_power_watts": 15.0,
+      "electricity_usd_per_kwh": 0.12,
+      "inference_hours_per_month": 10.0
+    },
+    "warning": "API prices are unverified; confirm against the provider's pricing page."
+  },
+  "breakeven_monthly_tokens": 53998334,
+  "results": [
+    {
+      "provider_or_method": "Generic API (assumed \u2014 unverified)",
+      "monthly_input_tokens": 1000000,
+      "monthly_output_tokens": 200000,
+      "monthly_cost_usd": 0.5,
+      "cost_per_1k_tokens_usd": 0.00041666666666666664,
+      "notes": ""
+    },
+    {
+      "provider_or_method": "On-Prem CPU",
+      "monthly_input_tokens": 0,
+      "monthly_output_tokens": 200000,
+      "monthly_cost_usd": 22.22876672484002,
+      "cost_per_1k_tokens_usd": 0.1111438336242001,
+      "notes": "hw=$22.22 elec=$0.0065 hrs=3.6"
+    }
+  ]
+}

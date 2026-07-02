@@ -85,7 +85,15 @@ Mark tasks with `[x]` when complete.
       failure either way.
 - [ ] Run explicit quantization comparison (current baselines are Q4_K_M only; no
       FP16/other quantization level has been compared yet)
-- [ ] Run economic analysis: `uv run python -m salareen_ex05.main costs --tokens-per-sec 15.28`
+- [x] Implement configurable economic analysis (`costs.py` + `economic_cli.py`);
+      CLI command `uv run python -m salareen_ex05.main costs` with 11 configurable
+      flags (token volumes, API prices, hardware price, amortization, electricity,
+      power draw); saves `results/economic_analysis.json`/`.csv` and
+      `figures/economic_break_even.png`; README "Economic Analysis —
+      Assumption-Based Draft" section added with formulas and a generated result
+- [ ] **Verify official API prices before final submission** — current API pricing
+      in the economic analysis is an unverified placeholder assumption, not checked
+      against any provider's live pricing page
 - [ ] Generate final comparative plots across all phases
 - [ ] Write final README report and generate `salareen-ex05.pdf`
 
@@ -128,11 +136,13 @@ Mark tasks with `[x]` when complete.
 - [ ] Implement `plots.py`: latency bar chart
 - [ ] Implement `plots.py`: RAM bar chart
 - [ ] Implement `plots.py`: throughput comparison
-- [ ] Implement `costs.py`: on-prem cost calculation
-- [ ] Implement `costs.py`: API cost calculation
-- [ ] Implement `plots.py`: break-even curve
-- [ ] Save all figures to `figures/` (PNG, 300 dpi)
-- [ ] Add figures to README results section
+- [x] Implement `costs.py`: on-prem cost calculation
+- [x] Implement `costs.py`: API cost calculation (draft — see pending price
+      verification in Phase 3b)
+- [x] Implement `plots.py`: break-even curve (`cost_breakeven_curve`, used via
+      `economic_break_even.png`)
+- [x] Save economic analysis figure to `figures/` (PNG, 300 dpi)
+- [x] Add economic analysis figure/table to README results section
 
 ---
 

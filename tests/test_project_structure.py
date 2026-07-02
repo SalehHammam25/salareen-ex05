@@ -133,6 +133,11 @@ def test_airllm_feasibility_file_exists():
     assert _p("src", "salareen_ex05", "airllm_feasibility.py").is_file()
 
 
+def test_economic_cli_importable():
+    from salareen_ex05 import economic_cli  # noqa: F401
+    assert _p("src", "salareen_ex05", "economic_cli.py").is_file()
+
+
 def test_benchmark_prompt_file_exists():
     assert _p("data", "prompts", "ollama_benchmark_prompt.txt").is_file()
 

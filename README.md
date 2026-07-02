@@ -359,9 +359,64 @@ downloading a 7B model up front.
 
 ---
 
+### Economic Analysis — Assumption-Based Draft
+
+Implemented in `src/salareen_ex05/costs.py` (+ CLI wiring in
+`src/salareen_ex05/economic_cli.py`), run via
+`uv run python -m salareen_ex05.main costs`. **No external API is called** — every
+price below is a configurable default the caller can override with CLI flags.
+
+> **⚠️ Pricing has not been verified.** The API input/output prices are placeholder
+> assumptions, not current pricing pulled from any provider. Do not treat this
+> analysis as final until the prices are checked against the provider's live pricing
+> page and updated via CLI flags.
+
+**Assumptions (defaults, all overridable via CLI flags):**
+
+| Assumption | Default | Flag |
+|------------|---------|------|
+| API input price | $0.25 / 1M tokens *(unverified)* | `--api-input-price-per-m` |
+| API output price | $1.25 / 1M tokens *(unverified)* | `--api-output-price-per-m` |
+| On-prem hardware price | $800.00 | `--hardware-price` |
+| Amortization period | 3 years | `--amortization-years` |
+| Electricity cost | $0.12 / kWh | `--electricity-cost-per-kwh` |
+| Average CPU power under load | 15 W (i7-8550U estimate) | `--avg-power-watts` |
+| On-prem throughput | 15.28 tok/s *(measured, qwen2.5:1.5b baseline)* | `--tokens-per-sec` |
+
+**API monthly cost formula:**
+`api_cost = (input_tokens / 1e6) × input_price_per_m + (output_tokens / 1e6) × output_price_per_m`
+
+**On-Prem monthly cost formula:**
+`onprem_cost = (hardware_price / (amortization_years × 12)) + ((avg_power_watts / 1000) × inference_hours × electricity_cost_per_kwh)`
+where `inference_hours = (output_tokens / tokens_per_sec) / 3600`.
+
+**Generated draft result** (default workload: 1,000,000 input + 200,000 output
+tokens/month), saved to `results/economic_analysis.json` / `.csv` and
+`figures/economic_break_even.png`:
+
+| Method | Monthly cost (USD) | USD / 1k tokens |
+|--------|--------------------|------------------|
+| Generic API (assumed pricing) | $0.50 | $0.0004 |
+| On-Prem CPU | $22.23 | $0.1111 |
+
+Break-even (assumed pricing): ~53,998,334 total tokens/month.
+
+**Interpretation (draft, assumption-dependent):** at this default workload and these
+placeholder prices, the assumed API is far cheaper — on-prem cost is dominated by
+hardware amortization ($22.22/mo of the $22.23 total), not electricity ($0.0065/mo),
+because the workload is small relative to a fixed monthly hardware charge. The
+break-even point (~54M tokens/month) is driven almost entirely by how low the assumed
+API price is; if the real API price is higher, on-prem becomes competitive at a much
+lower volume. **This conclusion will change once real, verified API pricing is used**
+— it should not be read as a claim that on-prem CPU inference is uneconomical in
+general.
+
+---
+
 > **Still pending:** actual AirLLM install/run attempt (or documented fallback),
-> explicit quantization comparison, system-level Ollama memory tracking, economic
-> analysis, comparative charts across all phases, and final PDF report.
+> explicit quantization comparison, system-level Ollama memory tracking, **verification
+> of official API pricing for the economic analysis**, comparative charts across all
+> phases, and final PDF report.
 
 ---
 
