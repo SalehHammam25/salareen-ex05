@@ -63,7 +63,12 @@ Mark tasks with `[x]` when complete.
 - [x] Generate figure: `figures/ollama_benchmark_qwen2_5_1_5b_summary.png`
 - [x] Add cross-model comparison table and analysis to README §8
 - [ ] Repeat each model with `--runs 3` for mean ± std stability check
-- [ ] Measure system-level Ollama server memory (separate from script RSS)
+- [x] Collect Ollama model metadata (`ollama show`, `ollama list`) for qwen2.5:0.5b
+      and qwen2.5:1.5b; add "Ollama model metadata" table to README §8
+- [x] Capture a single-point-in-time Ollama process memory snapshot (WS/PM via
+      `Get-Process ollama`); document as a snapshot only, not full profiling
+- [ ] Measure system-level Ollama server memory with continuous/peak tracking during
+      generation (precise memory profiling — snapshot above is not sufficient)
 - [ ] Test a larger model (≥ 7B) or GGUF-quantized variant
 - [ ] Attempt AirLLM layer-streaming on 7B model; document success or failure
 - [ ] Run economic analysis: `uv run python -m salareen_ex05.main costs --tokens-per-sec 15.28`

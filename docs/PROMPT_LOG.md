@@ -183,4 +183,42 @@ AirLLM, quantization, economic analysis, and final report remain pending.
 
 ---
 
+## Entry 006 — 2026-07-02
+
+**Purpose:** Add real Ollama model metadata and a process memory snapshot to README §8.
+
+**Tool used:** Claude (Anthropic) via VS Code Claude Code extension.
+
+**Real data provided by user (not fabricated):**
+- `ollama show qwen2.5:1.5b`: architecture qwen2, parameters 1.5B, context_length 32768,
+  embedding_length 1536, quantization Q4_K_M, license Apache License 2.0.
+- `ollama show qwen2.5:0.5b` (read from saved file): architecture qwen2, parameters
+  494.03M, context_length 32768, embedding_length 896, quantization Q4_K_M, license
+  Apache License 2.0.
+- Ollama process memory snapshot (`Get-Process ollama`): PM ≈ 83,738,624 bytes,
+  WS ≈ 62,029,824 bytes, StartTime 7/2/2026 12:50:35 AM.
+- Source files: `results/ollama_models_list.txt`, `results/ollama_show_qwen2_5_0_5b.txt`,
+  `results/ollama_show_qwen2_5_1_5b.txt`, `results/ollama_process_memory_snapshot.txt`.
+
+**Key constraints given:**
+- Do not fake results.
+- Do not claim AirLLM was tested yet.
+- Do not claim system-level memory tracking is complete.
+- Keep the writing honest and technical.
+
+**Changes made:**
+- `README.md` §8 — added new "Ollama model metadata" subsection with a metadata table
+  for both models, a quantization note (Ollama models are already quantized Q4_K_M, so
+  existing baselines are not FP16), and a process-memory note (62 MB WS is a single
+  snapshot of the Ollama process only, not the full generation-time memory footprint;
+  precise profiling still pending).
+- `docs/TODO.md` — marked Ollama model metadata collection and the process memory
+  snapshot as complete; kept precise system-level memory profiling (continuous/peak
+  tracking during generation) as pending.
+- `docs/PROMPT_LOG.md` — this entry.
+
+**Outcome:** README now documents real, verifiable model metadata and a single memory
+snapshot, clearly scoped as partial. AirLLM, full-precision baseline, continuous memory
+profiling, and economic analysis remain pending.
+
 <!-- Add new entries below this line -->

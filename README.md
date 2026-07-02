@@ -162,6 +162,41 @@ token volume on-prem becomes cheaper than API.
 
 ## 8. Results
 
+### Ollama model metadata
+
+Metadata collected directly from `ollama show <model>` for the two models used in the
+baselines below.
+
+| Field | qwen2.5:0.5b | qwen2.5:1.5b |
+|-------|--------------|--------------|
+| Architecture | qwen2 | qwen2 |
+| Parameters | 494.03M | 1.5B |
+| Context length | 32768 | 32768 |
+| Embedding length | 896 | 1536 |
+| Quantization | Q4_K_M | Q4_K_M |
+| License | Apache License 2.0 | Apache License 2.0 |
+
+Raw command output saved in `results/ollama_show_qwen2_5_0_5b.txt`,
+`results/ollama_show_qwen2_5_1_5b.txt`, and `results/ollama_models_list.txt`.
+
+> **Quantization note:** Both models are pulled from the Ollama library already
+> quantized. `ollama show qwen2.5:1.5b` reports `quantization: Q4_K_M`. This means the
+> baselines recorded in this section are **not** full-precision FP16 inference — they
+> already benefit from 4-bit quantization applied by Ollama/GGUF at model-pull time.
+> A true FP16 baseline (Phase A in §4) has not been run yet; the numbers below should be
+> read as "quantized CPU inference," not as an FP16 reference point.
+
+> **Process memory note:** A single point-in-time snapshot of the `ollama` server
+> process (`Get-Process ollama`) recorded a working set (WS) of about 62,029,824 bytes
+> (~62 MB) and a private memory (PM) of about 83,738,624 bytes (~84 MB); see
+> `results/ollama_process_memory_snapshot.txt`. This is only a snapshot of the Ollama
+> process at one moment — it does **not** represent the full model-memory footprint
+> during active generation, and no continuous/peak memory tracking has been done yet.
+> More precise, time-resolved memory profiling (e.g. sampling WS/PM throughout a
+> generation run) is still needed in a later phase.
+
+---
+
 ### Baseline 1: Ollama — qwen2.5:0.5b (CPU-only)
 
 First real inference result collected on the target hardware using the Ollama HTTP API
